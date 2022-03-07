@@ -36,10 +36,8 @@ public class BlogHandler {
     }
 
     public Mono<ServerResponse> save(ServerRequest request) {
-
         return request.bodyToMono(Blog.class)
-                .flatMap(blog -> this.blogService.save(blog))
-                .flatMap(blog -> ServerResponse.ok().body(Mono.just(blog), Blog.class));
+                .flatMap(blog -> this.blogService.save(blog));
     }
 
     public Mono<ServerResponse> delete(ServerRequest request) {

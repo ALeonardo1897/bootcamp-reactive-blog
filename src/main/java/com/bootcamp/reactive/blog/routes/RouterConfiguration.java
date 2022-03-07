@@ -3,6 +3,7 @@ package com.bootcamp.reactive.blog.routes;
 import com.bootcamp.reactive.blog.handlers.AuthorHandler;
 import com.bootcamp.reactive.blog.handlers.BlogHandler;
 import com.bootcamp.reactive.blog.handlers.PostHandler;
+import com.bootcamp.reactive.blog.handlers.UserHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RequestPredicates;
@@ -49,6 +50,14 @@ public class RouterConfiguration {
                 RouterFunctions.route(GET(""), postHandler::findAll)
                 .andRoute(POST("").and(accept(APPLICATION_JSON)),postHandler::save)
                 );
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> userRoutes(UserHandler userHandler){
+        return RouterFunctions.nest(RequestPredicates.path("/users"),
+                RouterFunctions.route(POST("/login"), userHandler::login)
+                        .andRoute(POST(""), userHandler::create)
+        );
     }
 
 }

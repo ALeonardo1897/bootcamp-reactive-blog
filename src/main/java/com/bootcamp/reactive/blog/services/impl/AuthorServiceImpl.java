@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Date;
+
 @Service
 public class AuthorServiceImpl implements AuthorService {
 
@@ -19,7 +21,9 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public Mono<Author> findById(String id) {
-        return this.authorRepository.findById(id);
+        return this.authorRepository
+                .findById(id)
+                .switchIfEmpty(Mono.error(new AuthorNotFoundException("author.notFound")));
     }
 
     @Override
@@ -55,18 +59,10 @@ public class AuthorServiceImpl implements AuthorService {
     @Override
     public Mono<Author> saveWithValidation(Author author) {
 
-//        return this.authorRepository.existsByEmail(author.getEmail())
-//                .flatMap(exists->
-//                        {
-//                            return exists ? Mono.empty():this.authorRepository.save(author);
-//                        });
-
         return this.authorRepository.existsByEmail(author.getEmail())
-                .flatMap(exists->
-                {
-                    return !exists ? this.authorRepository.save(author): Mono.error(new AuthorExistsException("Author exists"));
+                .flatMap(exists-> {
+                    return !exists ? authorRepository.save(author) : Mono.error(new AuthorExistsException("Author exists"));
                 });
-
     }
 
     @Override
@@ -86,6 +82,14 @@ public class AuthorServiceImpl implements AuthorService {
 
 //        return this.authorRepository.deleteById(id);
 
+    }
+
+    public boolean isOlderThan18(Author author){
+
+        long diffInMillies = Math.abs(new Date().getTime() - author.getBirthDate().getTime());
+        long diff = (diffInMillies / (1000l * 60 * 60 * 24 * 365));
+
+        return diff > 18 ? true : false;
     }
 
 }
